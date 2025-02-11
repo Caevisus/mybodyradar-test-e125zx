@@ -1,0 +1,209 @@
+# Development Dependencies and Build Output
+node_modules/
+dist/
+build/
+coverage/
+.gradle/
+target/
+out/
+bin/
+gen/
+tmp/
+temp/
+
+# Environment and Configuration Files
+.env
+.env.*
+*.local
+.env.development
+.env.production
+.env.test
+*.config.local
+config.local.*
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-*
+.atom/
+*.code-workspace
+
+# Logs and Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+logs/
+*.debug
+crash.log
+sysinfo.log
+*.crash
+crash_report.txt
+
+# Build and Compilation Artifacts
+*.class
+*.jar
+*.war
+*.ear
+*.dll
+*.exe
+*.o
+*.so
+*.dylib
+*.tsbuildinfo
+.tsc/
+*.js.map
+*.css.map
+
+# Mobile Development
+## iOS
+xcuserdata/
+*.xcuserdatad/
+*.xcworkspace/
+Pods/
+*.ipa
+*.dSYM.zip
+*.dSYM
+DerivedData/
+.build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.xcarchive
+
+## Android
+*.apk
+*.aab
+*.ap_
+*.dex
+.gradle/
+local.properties
+proguard/
+*.hprof
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+
+# Security and Credentials
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.truststore
+aws.credentials
+*.secret
+secrets/
+credentials/
+private/
+*.private
+*_rsa
+*_dsa
+*.gpg
+.gnupg/
+
+# Infrastructure and Cloud
+## AWS
+.aws/
+aws.json
+.elasticbeanstalk/
+.ebextensions/
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfplan
+.terraformrc
+terraform.rc
+
+## Kubernetes
+kubeconfig
+*.kubeconfig
+kube.config
+.kube/
+*secret*.yaml
+*secrets*.yaml
+*key*.yaml
+
+# Testing and Coverage
+.nyc_output/
+coverage/
+.coverage
+htmlcov/
+test-results/
+test-reports/
+junit.xml
+coverage.xml
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Monitoring and Analytics
+monitoring/data/
+grafana/data/
+prometheus/data/
+*.trace
+*.heap
+*.memprof
+performance_report.json
+metrics/
+analytics/
+
+# Dependencies Lock Files
+# Keep these files for reproducible builds
+!package-lock.json
+!yarn.lock
+!Podfile.lock
+!Gemfile.lock
+!poetry.lock
+!pnpm-lock.yaml
+
+# Documentation and Assets
+# These should typically be version controlled
+!docs/
+!*.md
+!LICENSE
+!README*
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Sensor and Device Specific
+*.sensor.log
+*.calibration
+*.trace
+sensor-sim/
+device-logs/
+calibration-data/
+raw-sensor-data/
