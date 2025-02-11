@@ -1,0 +1,200 @@
+name: iOS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging 
+          - production
+      force_deploy:
+        description: 'Force deployment without approval'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DEVELOPER_APP_ID: ${{ secrets.DEVELOPER_APP_ID }}
+  DEVELOPER_APP_IDENTIFIER: ${{ secrets.DEVELOPER_APP_IDENTIFIER }}
+  DEVELOPER_PORTAL_TEAM_ID: ${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}
+  MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+  PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
+  TEMP_KEYCHAIN_PASSWORD: ${{ secrets.TEMP_KEYCHAIN_PASSWORD }}
+  TEMP_KEYCHAIN_USER: ${{ secrets.TEMP_KEYCHAIN_USER }}
+  APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+  APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+  APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+  DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+  WORKING_DIRECTORY: ./src/ios
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby environment
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Cache Ruby dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: ${{ runner.os }}-gems-
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Cache Pods
+        uses: actions/cache@v3
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: |
+          bundle exec pod install --repo-update
+
+      - name: Run SwiftLint
+        run: |
+          bundle exec fastlane run swiftlint strict:true config_file:".swiftlint.yml"
+
+      - name: Run tests
+        run: |
+          bundle exec fastlane test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ${{ env.WORKING_DIRECTORY }}/build/test_output
+
+  build_and_deploy:
+    name: Build and Deploy
+    needs: test
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby environment
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Cache Ruby dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: ${{ runner.os }}-gems-
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Cache Pods
+        uses: actions/cache@v3
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: |
+          bundle exec pod install --repo-update
+
+      - name: Setup temporary keychain
+        run: |
+          bundle exec fastlane run create_keychain \
+            name:"CI" \
+            password:$TEMP_KEYCHAIN_PASSWORD \
+            default_keychain:true \
+            unlock:true \
+            timeout:3600 \
+            add_to_search_list:true
+
+      - name: Download provisioning profiles
+        uses: apple-actions/download-provisioning-profiles@v1
+        with:
+          bundle-id: ${{ env.DEVELOPER_APP_IDENTIFIER }}
+          profile-type: 'IOS_APP_STORE'
+          issuer-id: ${{ env.APPLE_ISSUER_ID }}
+          api-key-id: ${{ env.APPLE_KEY_ID }}
+          api-private-key: ${{ env.APPLE_KEY_CONTENT }}
+
+      - name: Build app
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            bundle exec fastlane build_release
+          else
+            bundle exec fastlane build_development
+          fi
+
+      - name: Run security scan
+        run: |
+          bundle exec fastlane run scan_for_vulnerabilities
+
+      - name: Deploy to TestFlight
+        if: github.event.inputs.environment != 'development'
+        run: |
+          bundle exec fastlane deploy_testflight
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          bundle exec fastlane run delete_keychain \
+            name:"CI"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: ${{ env.WORKING_DIRECTORY }}/build
+
+      - name: Send metrics to Datadog
+        if: always()
+        run: |
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+            -d @- << EOF
+            {
+              "series": [
+                {
+                  "metric": "ci.ios.build",
+                  "points": [[$(date +%s), 1]],
+                  "type": "count",
+                  "tags": ["environment:${{ github.event.inputs.environment }}", "branch:${{ github.ref }}"]
+                }
+              ]
+            }
+            EOF
