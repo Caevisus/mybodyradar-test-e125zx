@@ -1,0 +1,31 @@
+# These owners will be the default owners for everything in
+# the repository unless a later match takes precedence
+* @repo-admins
+
+# Backend service ownership
+src/backend/ @backend-team @security-team
+src/backend/src/services/sensor/ @sensor-team @backend-team @security-team
+src/backend/src/services/analytics/ @analytics-team @backend-team @security-team
+src/backend/src/services/alert/ @monitoring-team @backend-team @security-team
+src/backend/src/services/auth/ @security-team @backend-team
+
+# Frontend application ownership
+src/web/ @frontend-team @security-team
+
+# Mobile application ownership
+src/ios/ @mobile-team @ios-experts @security-team
+src/android/ @mobile-team @android-experts @security-team
+
+# Infrastructure and deployment
+infrastructure/ @devops-team @security-team
+.github/workflows/ @devops-team @security-team
+config/ @devops-team @security-team
+
+# Test files
+*.test.ts @qa-team @security-team
+
+# Package dependencies
+package.json @security-team @devops-team
+
+# Security documentation
+docs/security/ @security-team
