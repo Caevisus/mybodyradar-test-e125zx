@@ -1,0 +1,231 @@
+---
+# Kong API Gateway ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: backend
+  labels:
+    app: smart-apparel
+    component: api-gateway
+data:
+  kong.yml: |
+    _format_version: "2.1"
+    _transform: true
+    services:
+      - name: backend-api
+        url: http://api-service.backend.svc.cluster.local:8000
+        retries: 5
+        connect_timeout: 3000
+        write_timeout: 5000
+        read_timeout: 5000
+        protocol: http
+---
+# Kong API Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-gateway
+  namespace: backend
+  labels:
+    app: smart-apparel
+    component: api-gateway
+    version: v1
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: smart-apparel
+      component: api-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: smart-apparel
+        component: api-gateway
+        version: v1
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: kong
+        image: kong/kong-gateway:3.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: proxy
+          protocol: TCP
+        - containerPort: 8443
+          name: proxy-ssl
+          protocol: TCP
+        - containerPort: 8001
+          name: admin
+          protocol: TCP
+        - containerPort: 8444
+          name: admin-ssl
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: KONG_DATABASE
+          value: "off"
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /etc/kong/kong.yml
+        - name: KONG_PROXY_ACCESS_LOG
+          value: /dev/stdout
+        - name: KONG_ADMIN_ACCESS_LOG
+          value: /dev/stdout
+        - name: KONG_PROXY_ERROR_LOG
+          value: /dev/stderr
+        - name: KONG_ADMIN_ERROR_LOG
+          value: /dev/stderr
+        - name: KONG_ADMIN_LISTEN
+          value: "127.0.0.1:8001"
+        - name: KONG_SSL_CERT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kong-ssl
+              key: tls.key
+        - name: KONG_SSL_CERT
+          valueFrom:
+            secretKeyRef:
+              name: kong-ssl
+              key: tls.crt
+        - name: KONG_PLUGINS
+          value: bundled,cors,rate-limiting,jwt,oauth2,prometheus,request-transformer,response-transformer,ip-restriction,bot-detection,request-size-limiting
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 8100
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /status/ready
+            port: 8100
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+        volumeMounts:
+        - name: kong-config
+          mountPath: /etc/kong
+          readOnly: true
+      volumes:
+      - name: kong-config
+        configMap:
+          name: kong-config
+---
+# Kong API Gateway Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-gateway
+  namespace: backend
+  labels:
+    app: smart-apparel
+    component: api-gateway
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: proxy
+  - port: 443
+    targetPort: 8443
+    protocol: TCP
+    name: proxy-ssl
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: metrics
+  selector:
+    app: smart-apparel
+    component: api-gateway
+---
+# Horizontal Pod Autoscaler for Kong Gateway
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kong-gateway-hpa
+  namespace: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kong-gateway
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 60
+---
+# Network Policies for Kong Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kong-gateway-network-policy
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: smart-apparel
+      component: api-gateway
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - ports:
+    - port: 8000
+      protocol: TCP
+    - port: 8443
+      protocol: TCP
+    - port: 9090
+      protocol: TCP
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: backend
+    ports:
+    - port: 8000
+      protocol: TCP
