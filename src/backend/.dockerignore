@@ -1,0 +1,68 @@
+.env*
+.eslintrc*
+.prettierrc*
+nodemon.json
+tsconfig.json
+*.log
+npm-debug.log*
+.vscode/
+.idea/
+.editorconfig
+.vim/
+*.sublime-*
+
+# Version control
+.git/
+.gitignore
+.github/
+
+# Test files
+tests/
+coverage/
+**/*.test.ts
+**/*.spec.ts
+jest.config.ts
+
+# Documentation
+README.md
+CONTRIBUTING.md
+docs/
+*.md
+
+# Build artifacts
+dist/
+node_modules/
+*.js.map
+*.d.ts
+**/.npm/_logs/*
+**/.npm/_cacache/*
+yarn-debug.log*
+yarn-error.log*
+
+# Security sensitive files
+**/*.pem
+**/*.key
+**/*.crt
+**/*.csr
+**/*.pfx
+**/*.p12
+**/id_rsa*
+**/id_dsa*
+**/.env*
+**/*.env
+
+# System files
+.tmp/
+.temp/
+*.pid
+*.seed
+*.pid.lock
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*.swo
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
