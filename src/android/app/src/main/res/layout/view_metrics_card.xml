@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/metrics_card"
+    style="@style/Widget.App.MetricsCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/metrics_card_margin"
+    android:focusable="true"
+    android:clickable="true"
+    android:importantForAccessibility="yes"
+    app:contentPadding="16dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Header Section -->
+        <TextView
+            android:id="@+id/metrics_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/performance_metrics"
+            android:contentDescription="@string/performance_metrics"
+            style="@style/TextAppearance.App.Headline2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/expand_button"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageButton
+            android:id="@+id/expand_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/expand_metrics"
+            android:src="@drawable/ic_expand_more"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorOnSurface"/>
+
+        <!-- Primary Metrics Section -->
+        <LinearLayout
+            android:id="@+id/primary_metrics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/metrics_title">
+
+            <!-- Force Metric -->
+            <TextView
+                android:id="@+id/force_metric"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/TextAppearance.App.Body1"
+                android:text="@string/force_metric"
+                tools:text="Force: 850N"/>
+
+            <!-- Balance Metric -->
+            <TextView
+                android:id="@+id/balance_metric"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/TextAppearance.App.Body1"
+                android:text="@string/balance_metric"
+                tools:text="Balance: 48L/52R"/>
+        </LinearLayout>
+
+        <!-- Expandable Details Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/expanded_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/primary_metrics">
+
+            <!-- Detailed Metrics Grid -->
+            <GridLayout
+                android:id="@+id/metrics_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="3"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- IMU Data -->
+                <TextView
+                    android:id="@+id/imu_data"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    tools:text="Acceleration: 2.5 m/s²"/>
+
+                <!-- ToF Data -->
+                <TextView
+                    android:id="@+id/tof_data"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    tools:text="Distance: 45 cm"/>
+
+                <!-- Muscle Activity -->
+                <TextView
+                    android:id="@+id/muscle_activity"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    tools:text="Activity: 75%"/>
+            </GridLayout>
+
+            <!-- Update Timestamp -->
+            <TextView
+                android:id="@+id/update_timestamp"
+                style="@style/TextAppearance.App.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/metrics_grid"
+                tools:text="Last updated: 1s ago"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
