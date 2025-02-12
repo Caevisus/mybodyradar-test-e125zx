@@ -1,0 +1,222 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for API Gateway infrastructure supporting the smart-apparel system
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+  RestApiName:
+    Type: String
+    Description: Name for the REST API Gateway
+    Default: smart-apparel-rest-api
+  WebSocketApiName:
+    Type: String
+    Description: Name for the WebSocket API Gateway
+    Default: smart-apparel-ws-api
+  CertificateArn:
+    Type: String
+    Description: ARN of ACM certificate for custom domain
+  WafAclId:
+    Type: String
+    Description: ID of WAF ACL to associate with APIs
+  CognitoUserPoolArn:
+    Type: String
+    Description: ARN of Cognito User Pool for authentication
+
+Resources:
+  # REST API Gateway
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref RestApiName
+      Description: REST API for smart-apparel system
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      MinimumCompressionSize: 1024
+      BinaryMediaTypes:
+        - application/octet-stream
+      ApiKeySourceType: HEADER
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # REST API Stage
+  RestApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestApi
+      StageName: !Ref EnvironmentName
+      Description: !Sub ${EnvironmentName} stage for REST API
+      TracingEnabled: true
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: true
+          DataTraceEnabled: true
+          LoggingLevel: INFO
+          ThrottlingBurstLimit: 1000
+          ThrottlingRateLimit: 1000
+      Variables:
+        env: !Ref EnvironmentName
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","caller":"$context.identity.caller","user":"$context.identity.user","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength"}'
+
+  # WebSocket API
+  WebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Ref WebSocketApiName
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+      Tags:
+        Environment: !Ref EnvironmentName
+
+  # WebSocket Stage
+  WebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WebSocketApi
+      StageName: !Ref EnvironmentName
+      Description: !Sub ${EnvironmentName} stage for WebSocket API
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 100
+        ThrottlingRateLimit: 100
+        DataTraceEnabled: true
+        DetailedMetricsEnabled: true
+      AccessLogSettings:
+        DestinationArn: !GetAtt WebSocketAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","connectionId":"$context.connectionId","messageId":"$context.messageId","requestTime":"$context.requestTime","routeKey":"$context.routeKey","status":"$context.status"}'
+
+  # REST API Authorizer
+  CognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoAuthorizer
+      RestApiId: !Ref RestApi
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !Ref CognitoUserPoolArn
+
+  # WAF Association for REST API
+  RestApiWafAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${RestApi}/stages/${EnvironmentName}
+      WebACLArn: !Ref WafAclId
+
+  # WAF Association for WebSocket API
+  WebSocketWafAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/apis/${WebSocketApi}/stages/${EnvironmentName}
+      WebACLArn: !Ref WafAclId
+
+  # Custom Domain
+  CustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Sub api.${EnvironmentName}.smart-apparel.com
+      RegionalCertificateArn: !Ref CertificateArn
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      SecurityPolicy: TLS_1_2
+
+  # API Gateway VPC Link
+  VpcLink:
+    Type: AWS::ApiGateway::VpcLink
+    Properties:
+      Name: !Sub ${EnvironmentName}-vpc-link
+      TargetArns:
+        - !ImportValue 
+          Fn::Sub: ${EnvironmentName}-VpcStack-PrivateSubnets
+
+  # Log Groups
+  ApiGatewayAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${EnvironmentName}-rest-api
+      RetentionInDays: 30
+
+  WebSocketAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${EnvironmentName}-websocket-api
+      RetentionInDays: 30
+
+  # Usage Plan
+  ApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub ${EnvironmentName}-usage-plan
+      Description: Usage plan for REST API
+      ApiStages:
+        - ApiId: !Ref RestApi
+          Stage: !Ref EnvironmentName
+      Throttle:
+        BurstLimit: 1000
+        RateLimit: 1000
+      Quota:
+        Limit: 1000000
+        Period: MONTH
+
+  # Gateway Responses
+  GatewayResponse4XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref RestApi
+      ResponseType: DEFAULT_4XX
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      ResponseTemplates:
+        application/json: '{"message":$context.error.messageString,"type":"ClientError","statusCode":$context.status}'
+
+  GatewayResponse5XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref RestApi
+      ResponseType: DEFAULT_5XX
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      ResponseTemplates:
+        application/json: '{"message":"Internal server error","type":"ServerError","statusCode":$context.status}'
+
+Outputs:
+  RestApiId:
+    Description: REST API ID
+    Value: !Ref RestApi
+    Export:
+      Name: !Sub ${AWS::StackName}-RestApiId
+
+  RestApiRootResourceId:
+    Description: Root resource ID of REST API
+    Value: !GetAtt RestApi.RootResourceId
+    Export:
+      Name: !Sub ${AWS::StackName}-RootResourceId
+
+  WebSocketApiId:
+    Description: WebSocket API ID
+    Value: !Ref WebSocketApi
+    Export:
+      Name: !Sub ${AWS::StackName}-WebSocketApiId
+
+  WebSocketApiEndpoint:
+    Description: WebSocket API endpoint URL
+    Value: !Sub wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}
+    Export:
+      Name: !Sub ${AWS::StackName}-WebSocketEndpoint
+
+  CustomDomainName:
+    Description: Custom domain name for API
+    Value: !Ref CustomDomain
+    Export:
+      Name: !Sub ${AWS::StackName}-CustomDomain
