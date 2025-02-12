@@ -1,0 +1,154 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: monitoring
+  labels:
+    app: jaeger
+    component: tracing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "16686"
+    spec:
+      containers:
+        - name: jaeger-all-in-one
+          # jaegertracing/all-in-one:1.45
+          image: jaegertracing/all-in-one:1.45
+          ports:
+            - containerPort: 16686
+              name: ui
+            - containerPort: 14268
+              name: collector
+            - containerPort: 14250
+              name: grpc
+            - containerPort: 9411
+              name: zipkin
+            - containerPort: 4317
+              name: otlp
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          env:
+            - name: SPAN_STORAGE_TYPE
+              value: "elasticsearch"
+            - name: ES_SERVER_URLS
+              value: "http://elasticsearch:9200"
+            - name: ES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: jaeger-es-creds
+                  key: username
+            - name: ES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jaeger-es-creds
+                  key: password
+            - name: SAMPLING_CONFIG_FILE
+              value: "/etc/jaeger/sampling.json"
+            - name: COLLECTOR_CONFIG_FILE
+              value: "/etc/jaeger/collector.json"
+            - name: INGESTER_CONFIG_FILE
+              value: "/etc/jaeger/ingester.json"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/jaeger
+      volumes:
+        - name: config-volume
+          configMap:
+            name: jaeger-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger
+  namespace: monitoring
+  labels:
+    app: jaeger
+    component: tracing
+spec:
+  type: ClusterIP
+  ports:
+    - port: 16686
+      targetPort: 16686
+      name: ui
+      protocol: TCP
+    - port: 14268
+      targetPort: 14268
+      name: collector
+      protocol: TCP
+    - port: 14250
+      targetPort: 14250
+      name: grpc
+      protocol: TCP
+    - port: 9411
+      targetPort: 9411
+      name: zipkin
+      protocol: TCP
+    - port: 4317
+      targetPort: 4317
+      name: otlp
+      protocol: TCP
+  selector:
+    app: jaeger
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-config
+  namespace: monitoring
+data:
+  sampling.json: |
+    {
+      "default_strategy": {
+        "type": "probabilistic",
+        "param": 0.1
+      },
+      "service_strategies": [
+        {
+          "service": "sensor-data-processor",
+          "type": "probabilistic",
+          "param": 1.0
+        },
+        {
+          "service": "analytics-engine",
+          "type": "probabilistic",
+          "param": 1.0
+        }
+      ]
+    }
+  collector.json: |
+    {
+      "zipkin": {
+        "host-port": ":9411"
+      },
+      "otlp": {
+        "enabled": true,
+        "grpc": {
+          "host-port": ":4317"
+        }
+      }
+    }
+  ingester.json: |
+    {
+      "deadlockInterval": "0ms",
+      "kafka": {
+        "consumer": {
+          "topic": "jaeger-spans",
+          "brokers": ["kafka:9092"]
+        }
+      }
+    }
