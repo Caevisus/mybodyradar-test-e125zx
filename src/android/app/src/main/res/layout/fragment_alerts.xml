@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Alerts Fragment Layout
+    Material Design 3.0 compliant layout for displaying real-time biomechanical and physiological alerts
+    Dependencies:
+    - androidx.swiperefreshlayout:swiperefreshlayout:1.1.0
+    - androidx.recyclerview:recyclerview:1.3.1
+    - com.google.android.material:material:1.9.0
+    - androidx.constraintlayout:constraintlayout:2.1.4
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/alerts_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:importantForAccessibility="yes"
+    android:contentDescription="@string/alerts_screen_description">
+
+    <!-- Filter Chips for Alert Categories -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/filter_chip_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_md"
+        android:minHeight="@dimen/touch_target_min"
+        android:touchscreenBlocksFocus="false"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:chipSpacingHorizontal="@dimen/spacing_sm"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_all"
+            android:checked="true"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:minHeight="@dimen/touch_target_min"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_high_priority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_high_priority"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:minHeight="@dimen/touch_target_min"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_biomechanical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_biomechanical"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:minHeight="@dimen/touch_target_min"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_physiological"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_physiological"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:minHeight="@dimen/touch_target_min"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- Swipe Refresh Layout for Alert List -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:importantForAccessibility="yes"
+        app:layout_constraintTop_toBottomOf="@id/filter_chip_group"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- RecyclerView for Alert Cards -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/alerts_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="@dimen/spacing_sm"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:importantForAccessibility="yes"
+            android:contentDescription="@string/alerts_list_description"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/view_alert_card"
+            tools:itemCount="5"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Empty State View -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/empty_state_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="empty_state_icon,empty_state_text"/>
+
+    <ImageView
+        android:id="@+id/empty_state_icon"
+        android:layout_width="@dimen/icon_size_lg"
+        android:layout_height="@dimen/icon_size_lg"
+        android:src="@drawable/ic_no_alerts"
+        android:contentDescription="@string/no_alerts_icon_description"
+        app:layout_constraintBottom_toTopOf="@id/empty_state_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"/>
+
+    <TextView
+        android:id="@+id/empty_state_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:text="@string/no_alerts_message"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/empty_state_icon"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
