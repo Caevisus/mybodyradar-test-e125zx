@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Chart visualization component for real-time sensor data display
+    Material Design 3.0 compliant with accessibility support
+    Dependencies:
+    - androidx.cardview:cardview:1.0.0
+    - androidx.constraintlayout:constraintlayout:2.1.4
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/spacing_md"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    android:foreground="?attr/selectableItemBackground"
+    android:focusable="true"
+    android:clickable="true"
+    style="@style/Widget.App.MetricsCard">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/touch_target_min"
+        android:padding="@dimen/spacing_md">
+
+        <!-- Chart Title -->
+        <TextView
+            android:id="@+id/chart_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_title"
+            android:textAppearance="@style/TextAppearance.App.Headline2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/chart_type_selector"
+            android:accessibilityHeading="true"/>
+
+        <!-- Chart Type Selector -->
+        <Spinner
+            android:id="@+id/chart_type_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:minHeight="@dimen/touch_target_min"
+            android:contentDescription="@string/chart_type_selector_description"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Custom Chart View -->
+        <com.smartapparel.app.presentation.components.ChartView
+            android:id="@+id/chart_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:minHeight="@dimen/chart_min_height"
+            android:maxHeight="@dimen/chart_max_height"
+            app:layout_constraintTop_toBottomOf="@id/chart_title"
+            app:layout_constraintBottom_toTopOf="@id/chart_legend"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintDimensionRatio="16:9"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:contentDescription="@string/chart_content_description"
+            android:importantForAccessibility="yes"
+            android:accessibilityLiveRegion="polite"
+            app:updateFrequency="100"/>
+
+        <!-- Chart Legend -->
+        <LinearLayout
+            android:id="@+id/chart_legend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_sm"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:minHeight="@dimen/touch_target_min">
+
+            <!-- Legend Items will be added dynamically -->
+            <TextView
+                android:id="@+id/legend_min"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.App.Caption"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:minHeight="@dimen/touch_target_min"
+                android:contentDescription="@string/legend_min_description"/>
+
+            <TextView
+                android:id="@+id/legend_max"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.App.Caption"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:minHeight="@dimen/touch_target_min"
+                android:contentDescription="@string/legend_max_description"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
