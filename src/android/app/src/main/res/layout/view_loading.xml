@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Loading View Layout
+    Material Design 3.0 compliant loading indicator with accessibility support
+    Package: com.google.android.material:material:1.9.0
+    Package: androidx.constraintlayout:constraintlayout:2.1.4
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/loading_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    android:clickable="true"
+    android:focusable="true"
+    android:importantForAccessibility="yes"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/loading_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:indicatorSize="48dp"
+        app:trackThickness="4dp"
+        app:indicatorColor="?attr/colorPrimary"
+        app:trackColor="?attr/colorSurface"
+        android:indeterminate="true"
+        android:contentDescription="@string/loading_indicator_description"
+        android:importantForAccessibility="yes"/>
+
+    <TextView
+        android:id="@+id/loading_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/progress_indicator"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:textAppearance="@style/TextAppearance.App.Body1"
+        android:textAlignment="center"
+        android:accessibilityLiveRegion="polite"
+        android:importantForAccessibility="yes"
+        android:textDirection="locale"
+        android:text="@string/loading_message"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
