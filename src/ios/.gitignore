@@ -1,0 +1,120 @@
+### Xcode ###
+## User settings and sensor preferences
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+## Xcode project files (except essential ones)
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+
+## Build generated
+build/
+DerivedData/
+*.build/
+.build/
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+### CocoaPods ###
+Pods/
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+
+### Carthage ###
+Carthage/
+Carthage/Build/
+Carthage/Checkouts/
+
+### Swift Package Manager ###
+.swiftpm/
+Package.resolved
+.netrc
+
+### Sensor and Analytics Data ###
+*.sensor.log
+*.calibration
+*.trace
+analytics-cache/
+sensor-sim/
+perf-test-results/
+performance_report.json
+*.analytics.config
+*.sensor.config
+
+### Credentials and Certificates ###
+*.cer
+*.mobileprovision
+*.p12
+*.p8
+*.certSigningRequest
+*.keychain
+*.provisionprofile
+private_keys/
+certificates/
+
+### Environment and Configuration ###
+.env*
+*.xcconfig
+!Debug.xcconfig
+!Release.xcconfig
+!Shared.xcconfig
+*.plist
+!Info.plist
+
+### Fastlane ###
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/derived_data/
+fastlane/metadata/
+
+### System Files ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+*~
+*.swp
+*.swo
+.Spotlight-V100
+.Trashes
+
+### IDE ###
+.idea/
+*.hmap
+*.ipa
+*.xcarchive
+*.xcresult/
+
+### Logs and Debugging ###
+*.log
+crash.log
+sysinfo.log
+*.crash
+crash_report.txt
+debug.log
+
+### Testing ###
+coverage.xml
+test-reports/
+test-results/
+junit.xml
+
+### Performance and Profiling ###
+*.trace
+*.trace.zip
+*.memgraph
+*.instruments
+timeline.json
