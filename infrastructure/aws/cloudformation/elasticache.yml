@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for ElastiCache Redis cluster supporting the smart-apparel system with high availability and performance optimizations
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  RedisNodeType:
+    Type: String
+    Description: Redis node instance type optimized for performance
+    Default: cache.r6g.large
+    AllowedValues:
+      - cache.r6g.large
+      - cache.r6g.xlarge
+      - cache.r6g.2xlarge
+
+  NumReplicas:
+    Type: Number
+    Description: Number of read replicas per shard for high availability
+    Default: 2
+    MinValue: 1
+    MaxValue: 5
+
+  SnapshotRetentionLimit:
+    Type: Number
+    Description: Number of days to retain automatic snapshots
+    Default: 7
+    MinValue: 0
+    MaxValue: 35
+
+Resources:
+  RedisParameterGroup:
+    Type: AWS::ElastiCache::ParameterGroup
+    Properties:
+      CacheParameterGroupFamily: redis6.x
+      Description: Optimized parameters for smart-apparel system Redis cluster
+      Parameters:
+        maxmemory-policy: volatile-lru
+        timeout: "300"
+        tcp-keepalive: "300"
+        maxmemory-samples: "10"
+        activedefrag: "yes"
+        active-defrag-threshold-lower: "10"
+        active-defrag-threshold-upper: "100"
+        active-defrag-cycle-min: "25"
+        active-defrag-cycle-max: "75"
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Subnet group for Redis cluster
+      SubnetIds: !Split [",", !ImportValue {"Fn::Sub": "${AWS::StackName}-PrivateSubnets"}]
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Redis cluster
+      VpcId: !ImportValue {"Fn::Sub": "${AWS::StackName}-VpcId"}
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          Description: Redis port access
+          SourceSecurityGroupId: !Ref ApplicationSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-redis-sg
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  ApplicationSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for application instances
+      VpcId: !ImportValue {"Fn::Sub": "${AWS::StackName}-VpcId"}
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-app-sg
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  RedisReplicationGroup:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupId: !Sub ${EnvironmentName}-redis-cluster
+      ReplicationGroupDescription: Redis cluster for smart-apparel system
+      Engine: redis
+      EngineVersion: 6.x
+      CacheNodeType: !Ref RedisNodeType
+      NumCacheClusters: !Add [1, !Ref NumReplicas]
+      AutomaticFailoverEnabled: true
+      MultiAZEnabled: true
+      CacheParameterGroupName: !Ref RedisParameterGroup
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds: 
+        - !Ref RedisSecurityGroup
+      Port: 6379
+      PreferredMaintenanceWindow: sun:05:00-sun:09:00
+      SnapshotRetentionLimit: !Ref SnapshotRetentionLimit
+      SnapshotWindow: 03:00-05:00
+      TransitEncryptionEnabled: true
+      AtRestEncryptionEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-redis-cluster
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  RedisAlarmCPU:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Redis cluster CPU utilization
+      MetricName: CPUUtilization
+      Namespace: AWS/ElastiCache
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      ThresholdMetricId: e1
+      DatapointsToAlarm: 2
+      Threshold: 75
+      AlarmActions:
+        - !Ref RedisAlarmTopic
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: CacheClusterId
+          Value: !Ref RedisReplicationGroup
+
+  RedisAlarmMemory:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Redis cluster memory usage
+      MetricName: DatabaseMemoryUsagePercentage
+      Namespace: AWS/ElastiCache
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      ThresholdMetricId: e1
+      DatapointsToAlarm: 2
+      Threshold: 80
+      AlarmActions:
+        - !Ref RedisAlarmTopic
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: CacheClusterId
+          Value: !Ref RedisReplicationGroup
+
+  RedisAlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${EnvironmentName}-redis-alarms
+
+Outputs:
+  RedisEndpoint:
+    Description: Primary endpoint for Redis cluster
+    Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-RedisEndpoint
+
+  RedisPort:
+    Description: Redis port
+    Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Port
+    Export:
+      Name: !Sub ${AWS::StackName}-RedisPort
+
+  RedisSecurityGroupId:
+    Description: Security group ID for Redis cluster
+    Value: !Ref RedisSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-RedisSecurityGroupId
+
+  ApplicationSecurityGroupId:
+    Description: Security group ID for application instances
+    Value: !Ref ApplicationSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-ApplicationSecurityGroupId
