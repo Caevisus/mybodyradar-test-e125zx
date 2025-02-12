@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for MSK Kafka cluster supporting the smart-apparel system
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  KafkaVersion:
+    Type: String
+    Description: Apache Kafka version
+    Default: '3.5.1'
+    AllowedValues:
+      - '3.5.1'
+      - '3.4.0'
+      - '3.3.2'
+
+  BrokerInstanceType:
+    Type: String
+    Description: MSK broker instance type
+    Default: kafka.m5.large
+    AllowedValues:
+      - kafka.m5.large
+      - kafka.m5.xlarge
+      - kafka.m5.2xlarge
+
+  BrokerNodes:
+    Type: Number
+    Description: Number of broker nodes per AZ
+    Default: 1
+    MinValue: 1
+    MaxValue: 3
+
+  RetentionPeriodHours:
+    Type: Number
+    Description: Message retention period in hours
+    Default: 168
+    MinValue: 24
+    MaxValue: 720
+
+Resources:
+  KafkaKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for MSK cluster encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+
+  KafkaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for MSK cluster
+      VpcId: !ImportValue VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 9092
+          ToPort: 9092
+          Description: Plaintext Kafka
+        - IpProtocol: tcp
+          FromPort: 9094
+          ToPort: 9094
+          Description: TLS Kafka
+        - IpProtocol: tcp
+          FromPort: 9096
+          ToPort: 9096
+          Description: SASL/SCRAM Kafka
+        - IpProtocol: tcp
+          FromPort: 2181
+          ToPort: 2181
+          Description: ZooKeeper
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-kafka-sg
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  LogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::AccountId}-${EnvironmentName}-kafka-logs
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: LogRetention
+            Status: Enabled
+            ExpirationInDays: 90
+
+  KafkaConfiguration:
+    Type: AWS::MSK::Configuration
+    Properties:
+      Name: !Sub ${EnvironmentName}-kafka-config
+      KafkaVersions:
+        - !Ref KafkaVersion
+      ServerProperties: |
+        auto.create.topics.enable=false
+        default.replication.factor=3
+        min.insync.replicas=2
+        num.partitions=6
+        log.retention.hours=${RetentionPeriodHours}
+        compression.type=lz4
+        unclean.leader.election.enable=false
+        max.message.bytes=1048588
+        socket.send.buffer.bytes=1048576
+        socket.receive.buffer.bytes=1048576
+        replica.lag.time.max.ms=30000
+        log.segment.bytes=1073741824
+        num.network.threads=8
+        num.io.threads=8
+        num.replica.fetchers=4
+
+  KafkaCluster:
+    Type: AWS::MSK::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-kafka-cluster
+      KafkaVersion: !Ref KafkaVersion
+      NumberOfBrokerNodes: !Mul [!Ref BrokerNodes, 3]
+      BrokerNodeGroupInfo:
+        InstanceType: !Ref BrokerInstanceType
+        ClientSubnets: !Split [',', !ImportValue PrivateSubnets]
+        SecurityGroups:
+          - !Ref KafkaSecurityGroup
+        StorageInfo:
+          EBSStorageInfo:
+            VolumeSize: 1000
+            ProvisionedThroughput:
+              Enabled: true
+              VolumeThroughput: 250
+      EncryptionInfo:
+        EncryptionInTransit:
+          ClientBroker: TLS
+          InCluster: true
+        EncryptionAtRest:
+          DataVolumeKMSKeyId: !GetAtt KafkaKMSKey.Arn
+      EnhancedMonitoring: PER_BROKER
+      OpenMonitoring:
+        Prometheus:
+          JmxExporter:
+            EnabledInBroker: true
+          NodeExporter:
+            EnabledInBroker: true
+      LoggingInfo:
+        BrokerLogs:
+          CloudWatchLogs:
+            Enabled: true
+            LogGroup: !Sub /aws/msk/${EnvironmentName}-kafka-cluster
+          S3:
+            Enabled: true
+            Bucket: !Ref LogBucket
+            Prefix: kafka-logs/
+      ConfigurationInfo:
+        Arn: !Ref KafkaConfiguration
+        Revision: 1
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Service
+          Value: smart-apparel-kafka
+
+Outputs:
+  KafkaClusterArn:
+    Description: ARN of the MSK cluster
+    Value: !Ref KafkaCluster
+    Export:
+      Name: !Sub ${AWS::StackName}-KafkaClusterArn
+
+  BootstrapServers:
+    Description: Kafka bootstrap server endpoints
+    Value: !GetAtt KafkaCluster.BootstrapBrokerString
+    Export:
+      Name: !Sub ${AWS::StackName}-BootstrapServers
+
+  BootstrapServersPublicTLS:
+    Description: Kafka bootstrap server endpoints (TLS)
+    Value: !GetAtt KafkaCluster.BootstrapBrokerStringTls
+    Export:
+      Name: !Sub ${AWS::StackName}-BootstrapServersTls
+
+  ZookeeperConnectString:
+    Description: Zookeeper connection string
+    Value: !GetAtt KafkaCluster.ZookeeperConnectString
+    Export:
+      Name: !Sub ${AWS::StackName}-ZookeeperConnect
