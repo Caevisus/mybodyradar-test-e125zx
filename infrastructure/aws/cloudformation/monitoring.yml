@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for deploying comprehensive monitoring infrastructure for the smart-apparel system
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: Environment name for resource tagging
+    AllowedValues:
+      - development
+      - staging
+      - production
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    Description: Number of days to retain CloudWatch logs
+    MinValue: 1
+    MaxValue: 365
+
+  AlertNotificationEmail:
+    Type: String
+    Description: Email address for monitoring alerts
+    AllowedPattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+Resources:
+  # KMS Key for encryption
+  PrometheusKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for Prometheus workspace encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+
+  # Prometheus Workspace
+  PrometheusWorkspace:
+    Type: AWS::AMP::Workspace
+    Properties:
+      Alias: !Sub ${EnvironmentName}-smart-apparel-prometheus
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+      Logging:
+        EnableCMKEncryption: true
+        KmsKeyId: !GetAtt PrometheusKMSKey.Arn
+      CrossAzConfig:
+        Enabled: true
+      RetentionPeriod:
+        Days: 15
+
+  # Grafana Workspace
+  GrafanaWorkspace:
+    Type: AWS::Grafana::Workspace
+    Properties:
+      Name: !Sub ${EnvironmentName}-smart-apparel-grafana
+      AccountAccessType: CURRENT_ACCOUNT
+      AuthenticationProviders:
+        - SAML
+      PermissionType: SERVICE_MANAGED
+      RoleArn: !ImportValue 'iam-stack::MonitoringRole'
+      DataSources:
+        - PROMETHEUS
+        - CLOUDWATCH
+      NotificationDestinations:
+        - SNS
+      SamlConfiguration:
+        AllowedOrganizations:
+          - !Ref AWS::AccountId
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # CloudWatch Log Groups
+  ApplicationLogGroup:
+    Type: AWS::CloudWatch::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/smart-apparel/${EnvironmentName}/application
+      RetentionInDays: !Ref LogRetentionDays
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  PerformanceLogGroup:
+    Type: AWS::CloudWatch::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/smart-apparel/${EnvironmentName}/performance
+      RetentionInDays: !Ref LogRetentionDays
+      MetricFilters:
+        - FilterName: LatencyFilter
+          FilterPattern: '[timestamp, requestId, latency>100]'
+          MetricTransformations:
+            - MetricName: HighLatency
+              MetricNamespace: SmartApparel
+              MetricValue: '1'
+
+  # SNS Topic for Alerts
+  AlertSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${EnvironmentName}-monitoring-alerts
+      DisplayName: Smart Apparel Monitoring Alerts
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlertNotificationEmail
+
+  # CloudWatch Alarms
+  LatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${EnvironmentName}-high-latency-alarm
+      MetricName: HighLatency
+      Namespace: SmartApparel
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref AlertSNSTopic
+
+  ErrorRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${EnvironmentName}-error-rate-alarm
+      MetricName: Errors
+      Namespace: SmartApparel
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref AlertSNSTopic
+
+  AvailabilityAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${EnvironmentName}-availability-alarm
+      MetricName: HealthyHostCount
+      Namespace: AWS/ApplicationELB
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      AlarmActions:
+        - !Ref AlertSNSTopic
+
+  SystemHealthAlarm:
+    Type: AWS::CloudWatch::CompositeAlarm
+    Properties:
+      AlarmName: !Sub ${EnvironmentName}-system-health
+      AlarmRule: !Sub "(ALARM(${LatencyAlarm}) OR ALARM(${ErrorRateAlarm})) AND ALARM(${AvailabilityAlarm})"
+      AlarmDescription: Composite alarm for overall system health monitoring
+      AlarmActions:
+        - !Ref AlertSNSTopic
+
+Outputs:
+  PrometheusEndpoint:
+    Description: Prometheus workspace endpoint URL
+    Value: !GetAtt PrometheusWorkspace.PrometheusEndpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-prometheus-endpoint
+
+  GrafanaEndpoint:
+    Description: Grafana workspace endpoint URL
+    Value: !GetAtt GrafanaWorkspace.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-grafana-endpoint
+
+  LogGroupArns:
+    Description: ARNs of CloudWatch log groups
+    Value: !Join
+      - ','
+      - - !GetAtt ApplicationLogGroup.Arn
+        - !GetAtt PerformanceLogGroup.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-log-group-arns
+
+  AlertTopicArn:
+    Description: ARN of the SNS topic for alerts
+    Value: !Ref AlertSNSTopic
+    Export:
+      Name: !Sub ${AWS::StackName}-alert-topic-arn
