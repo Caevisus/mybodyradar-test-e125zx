@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Smart Apparel Color Resources
+    Material Design 3.0 compliant color system with dynamic colors support
+    Package: com.google.android.material:material:1.9.0
+-->
+<resources>
+    <!-- Dynamic Theme Colors - Material Design 3.0 -->
+    <color name="primary">@color/material_dynamic_primary50</color>
+    <color name="primary_dark">@color/material_dynamic_primary30</color>
+    <color name="primary_variant">@color/material_dynamic_primary80</color>
+    <color name="secondary">@color/material_dynamic_secondary50</color>
+    <color name="secondary_dark">@color/material_dynamic_secondary30</color>
+    <color name="secondary_variant">@color/material_dynamic_secondary80</color>
+    <color name="tertiary">@color/material_dynamic_tertiary50</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#121212</color>
+    <color name="surface_light">#F5F5F5</color>
+    <color name="surface_dark">#1E1E1E</color>
+
+    <!-- Status Colors -->
+    <color name="error">#B00020</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFA000</color>
+    <color name="info">#2196F3</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary_light">#000000DE</color>
+    <color name="text_primary_dark">#FFFFFFDE</color>
+    <color name="text_secondary_light">#00000099</color>
+    <color name="text_secondary_dark">#FFFFFF99</color>
+
+    <!-- Heat Map Visualization Colors -->
+    <color name="heatmap_low">#43A047</color>
+    <color name="heatmap_medium">#FDD835</color>
+    <color name="heatmap_high">#E53935</color>
+    <color name="heatmap_critical">#B71C1C</color>
+
+    <!-- Sensor Status Indicator Colors -->
+    <color name="sensor_active">#43A047</color>
+    <color name="sensor_inactive">#757575</color>
+    <color name="sensor_error">#B00020</color>
+    <color name="sensor_calibrating">#FFA000</color>
+
+    <!-- Elevation Overlay Colors -->
+    <color name="elevation_overlay_1">#0000000D</color>
+    <color name="elevation_overlay_2">#00000014</color>
+    <color name="elevation_overlay_3">#0000001F</color>
+</resources>
