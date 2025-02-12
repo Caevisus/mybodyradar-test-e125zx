@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:hardwareAccelerated="true"
+    android:importantForAccessibility="yes">
+
+    <!-- App Bar with Material Design 3.0 elevation system -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.App.ActionBar"
+        app:liftOnScroll="true"
+        app:elevation="@dimen/card_elevation">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:minHeight="@dimen/toolbar_height"
+            app:title="@string/training_session"
+            app:navigationIcon="@drawable/ic_back"
+            app:menu="@menu/menu_session"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable content with nested scroll support -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_md">
+
+            <!-- Sensor Status Card -->
+            <include
+                android:id="@+id/sensor_status"
+                layout="@layout/view_sensor_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Performance Metrics Card -->
+            <include
+                android:id="@+id/metrics_card"
+                layout="@layout/view_metrics_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:layout_constraintTop_toBottomOf="@id/sensor_status"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Heat Map Visualization -->
+            <include
+                android:id="@+id/heatmap"
+                layout="@layout/view_heatmap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:layout_constraintTop_toBottomOf="@id/metrics_card"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Session Control Buttons -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_start_session"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/start_session"
+                android:minHeight="@dimen/button_height"
+                android:contentDescription="@string/start_session_description"
+                app:layout_constraintTop_toBottomOf="@id/heatmap"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_stop_session"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintWidth_percent="0.45"
+                style="@style/Widget.App.Button.Primary"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_stop_session"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_session"
+                android:minHeight="@dimen/button_height"
+                android:contentDescription="@string/stop_session_description"
+                android:enabled="false"
+                app:layout_constraintTop_toTopOf="@id/btn_start_session"
+                app:layout_constraintStart_toEndOf="@id/btn_start_session"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.45"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            <!-- Bottom Padding -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/spacing_lg"
+                app:layout_constraintTop_toBottomOf="@id/btn_start_session"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
