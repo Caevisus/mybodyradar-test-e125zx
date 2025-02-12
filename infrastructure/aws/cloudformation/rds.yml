@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for highly available RDS infrastructure with enhanced security and monitoring for the smart-apparel system
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  DBInstanceClass:
+    Type: String
+    Description: RDS instance class
+    Default: r6g.2xlarge
+    AllowedValues:
+      - r6g.xlarge
+      - r6g.2xlarge
+      - r6g.4xlarge
+
+  MultiAZDatabase:
+    Type: String
+    Description: Enable Multi-AZ deployment
+    Default: true
+    AllowedValues:
+      - true
+      - false
+
+  BackupRetentionPeriod:
+    Type: Number
+    Description: Number of days to retain automated backups
+    Default: 7
+    MinValue: 1
+    MaxValue: 35
+
+  DBName:
+    Type: String
+    Description: Name of the database
+    Default: smartapparel
+
+  DBUsername:
+    Type: String
+    Description: Database admin username
+    NoEcho: true
+
+  DBPassword:
+    Type: String
+    Description: Database admin password
+    NoEcho: true
+    MinLength: 8
+
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS instances
+      SubnetIds: !Split [",", !ImportValue PrivateSubnets]
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-smart-apparel-db-subnet-group
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for RDS access
+      VpcId: !ImportValue VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          Description: PostgreSQL access from application tier
+          SourceSecurityGroupId: !Ref ApplicationSecurityGroup
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-smart-apparel-rds-sg
+
+  RDSParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Family: postgres15
+      Description: Custom parameter group for smart-apparel RDS instances
+      Parameters:
+        shared_buffers: 8GB
+        max_connections: 1000
+        effective_cache_size: 24GB
+        maintenance_work_mem: 2GB
+        checkpoint_completion_target: 0.9
+        wal_buffers: 16MB
+        default_statistics_target: 100
+        random_page_cost: 1.1
+        effective_io_concurrency: 200
+        work_mem: 8MB
+        min_wal_size: 2GB
+        max_wal_size: 8GB
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub ${EnvironmentName}-smart-apparel-db
+      DBName: !Ref DBName
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: postgres
+      EngineVersion: 15.3
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      MultiAZ: !Ref MultiAZDatabase
+      StorageType: io2
+      Iops: 5000
+      AllocatedStorage: 500
+      MaxAllocatedStorage: 1000
+      BackupRetentionPeriod: !Ref BackupRetentionPeriod
+      PreferredBackupWindow: 03:00-04:00
+      PreferredMaintenanceWindow: Mon:04:00-Mon:05:00
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups: 
+        - !Ref RDSSecurityGroup
+      DBParameterGroupName: !Ref RDSParameterGroup
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
+      MonitoringInterval: 60
+      MonitoringRoleArn: !GetAtt RDSMonitoringRole.Arn
+      EnableCloudwatchLogsExports:
+        - postgresql
+        - upgrade
+      DeletionProtection: true
+      CopyTagsToSnapshot: true
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      AutoMinorVersionUpgrade: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-smart-apparel-rds
+
+  RDSMonitoringRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: monitoring.rds.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+Outputs:
+  RDSEndpoint:
+    Description: RDS instance endpoint
+    Value: !GetAtt RDSInstance.Endpoint.Address
+    Export:
+      Name: !Sub ${EnvironmentName}-RDSEndpoint
+
+  RDSPort:
+    Description: RDS instance port
+    Value: !GetAtt RDSInstance.Endpoint.Port
+    Export:
+      Name: !Sub ${EnvironmentName}-RDSPort
+
+  RDSSecurityGroupId:
+    Description: Security group ID for RDS instance
+    Value: !Ref RDSSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-RDSSecurityGroup
+
+  DBName:
+    Description: Name of the database
+    Value: !Ref DBName
+    Export:
+      Name: !Sub ${EnvironmentName}-DBName
