@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Smart Apparel Theme Configuration
+    Material Design 3.0 compliant themes with dynamic colors and day/night support
+    Package: com.google.android.material:material:1.9.0
+-->
+<resources>
+    <!-- Base Application Theme -->
+    <style name="Theme.App" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Material Design 3.0 Dynamic Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="android:windowBackground">@color/background_light</item>
+        
+        <!-- Material Components Styles -->
+        <item name="materialButtonStyle">@style/Widget.App.Button.Primary</item>
+        <item name="materialCardViewStyle">@style/Widget.App.Card</item>
+        <item name="elevationOverlayEnabled">true</item>
+
+        <!-- Custom Component Styles -->
+        <item name="appHeatMapStyle">@style/Widget.App.HeatMap</item>
+        <item name="appSensorIndicatorStyle">@style/Widget.App.SensorIndicator</item>
+        <item name="appPerformanceMetricStyle">@style/Widget.App.PerformanceMetric</item>
+        <item name="appBiometricGraphStyle">@style/Widget.App.BiometricGraph</item>
+
+        <!-- Dynamic Colors Support -->
+        <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Light</item>
+    </style>
+
+    <!-- Light Theme -->
+    <style name="Theme.App.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background_light</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
+        <!-- Heat Map Colors -->
+        <item name="heatMapGradientStartColor">@color/heatmap_gradient_start</item>
+        <item name="heatMapGradientEndColor">@color/heatmap_gradient_end</item>
+
+        <!-- Sensor Status Colors -->
+        <item name="sensorActiveColor">@color/sensor_active</item>
+        <item name="sensorInactiveColor">@color/sensor_inactive</item>
+
+        <!-- Material Design Elevation Overlays -->
+        <item name="elevationOverlayEnabled">false</item>
+    </style>
+
+    <!-- Dark Theme -->
+    <style name="Theme.App.Dark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Heat Map Colors - Adjusted for Dark Theme -->
+        <item name="heatMapGradientStartColor">@color/heatmap_gradient_start</item>
+        <item name="heatMapGradientEndColor">@color/heatmap_gradient_end</item>
+
+        <!-- Sensor Status Colors - Adjusted for Dark Theme -->
+        <item name="sensorActiveColor">@color/sensor_active</item>
+        <item name="sensorInactiveColor">@color/sensor_inactive</item>
+
+        <!-- Material Design Elevation Overlays -->
+        <item name="elevationOverlayEnabled">true</item>
+    </style>
+
+    <!-- Custom Attributes for Sports-Specific Components -->
+    <declare-styleable name="AppTheme">
+        <attr name="appHeatMapStyle" format="reference"/>
+        <attr name="appSensorIndicatorStyle" format="reference"/>
+        <attr name="appPerformanceMetricStyle" format="reference"/>
+        <attr name="appBiometricGraphStyle" format="reference"/>
+        <attr name="heatMapGradientStartColor" format="color"/>
+        <attr name="heatMapGradientEndColor" format="color"/>
+        <attr name="sensorActiveColor" format="color"/>
+        <attr name="sensorInactiveColor" format="color"/>
+    </declare-styleable>
+</resources>
