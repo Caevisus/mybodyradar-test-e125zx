@@ -1,0 +1,107 @@
+/* Import Material Design animation timing variables */
+@import './variables.css';
+
+/* GPU-accelerated fade animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Hardware-accelerated slide animations */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+/* Alert pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Optimized heatmap color transition */
+@keyframes heatmapTransition {
+  from { background-color: var(--prev-color); }
+  to { background-color: var(--next-color); }
+}
+
+/* Entry animation for fade transitions with GPU acceleration */
+.fade-enter {
+  opacity: 0;
+  animation: fadeIn var(--transition-duration-fast) var(--transition-timing-standard);
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+
+/* Exit animation for fade transitions with GPU acceleration */
+.fade-exit {
+  opacity: 1;
+  animation: fadeOut var(--transition-duration-fast) var(--transition-timing-standard);
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+
+/* Entry animation for slide transitions with hardware acceleration */
+.slide-enter {
+  transform: translateX(-100%);
+  animation: slideIn var(--transition-duration-normal) var(--transition-timing-decelerate);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Exit animation for slide transitions with hardware acceleration */
+.slide-exit {
+  transform: translateX(0);
+  animation: slideOut var(--transition-duration-normal) var(--transition-timing-accelerate);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Pulsing animation for alerts with performance optimization */
+.pulse {
+  animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Spinning animation for loading states with GPU acceleration */
+.spin {
+  animation: spin 1s linear infinite;
+  will-change: transform;
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+
+/* Performance-optimized transition for real-time heatmap updates */
+.heatmap-transition {
+  animation: heatmapTransition var(--transition-duration-fast) var(--transition-timing-standard);
+  will-change: background-color;
+  backface-visibility: hidden;
+  contain: paint;
+}
+
+/* Accessibility support for users with motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
