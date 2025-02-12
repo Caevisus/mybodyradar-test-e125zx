@@ -1,0 +1,202 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for production-grade EKS cluster with enhanced HA and performance features
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  ClusterName:
+    Type: String
+    Description: Name of the EKS cluster
+    Default: smart-apparel-cluster
+
+  KubernetesVersion:
+    Type: String
+    Description: Kubernetes version for EKS cluster
+    Default: 1.27
+    AllowedValues:
+      - 1.27
+      - 1.26
+      - 1.25
+
+  NodeInstanceType:
+    Type: String
+    Description: EC2 instance type for worker nodes
+    Default: t3.large
+    AllowedValues:
+      - t3.large
+      - t3.xlarge
+      - c6g.xlarge
+      - c6g.2xlarge
+
+  NodeDesiredCapacity:
+    Type: Number
+    Description: Desired number of worker nodes
+    Default: 3
+    MinValue: 1
+    MaxValue: 20
+
+  NodeMinSize:
+    Type: Number
+    Description: Minimum number of worker nodes
+    Default: 2
+    MinValue: 1
+    MaxValue: 10
+
+  NodeMaxSize:
+    Type: Number
+    Description: Maximum number of worker nodes
+    Default: 10
+    MinValue: 1
+    MaxValue: 20
+
+Conditions:
+  IsProd: !Equals [!Ref EnvironmentName, 'prod']
+
+Resources:
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub ${EnvironmentName}-${ClusterName}
+      Version: !Ref KubernetesVersion
+      RoleArn: !ImportValue 
+        'Fn::Sub': ${EnvironmentName}-eks-cluster-role
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref EKSSecurityGroup
+        SubnetIds: !Split 
+          - ','
+          - !ImportValue 
+            'Fn::Sub': ${AWS::StackName}-PrivateSubnets
+        EndpointPrivateAccess: true
+        EndpointPublicAccess: true
+        PublicAccessCidrs:
+          - 0.0.0.0/0
+      Logging:
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit
+            - Type: authenticator
+            - Type: controllerManager
+            - Type: scheduler
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${ClusterName}
+
+  EKSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for EKS cluster
+      VpcId: !ImportValue 
+        'Fn::Sub': ${AWS::StackName}-VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-eks-cluster-sg
+
+  NodeGroup:
+    Type: AWS::EKS::Nodegroup
+    DependsOn: EKSCluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-${ClusterName}
+      NodegroupName: !Sub ${EnvironmentName}-node-group
+      NodeRole: !ImportValue 
+        'Fn::Sub': ${EnvironmentName}-eks-node-role
+      ScalingConfig:
+        MinSize: !Ref NodeMinSize
+        MaxSize: !Ref NodeMaxSize
+        DesiredSize: !Ref NodeDesiredCapacity
+      Subnets: !Split 
+        - ','
+        - !ImportValue 
+          'Fn::Sub': ${AWS::StackName}-PrivateSubnets
+      InstanceTypes: 
+        - !Ref NodeInstanceType
+      AmiType: AL2_x86_64
+      DiskSize: 100
+      RemoteAccess:
+        Ec2SshKey: !If [IsProd, !Ref 'AWS::NoValue', 'eks-nodes']
+      Labels:
+        environment: !Ref EnvironmentName
+      Tags:
+        Name: !Sub ${EnvironmentName}-eks-node
+        Environment: !Ref EnvironmentName
+      UpdateConfig:
+        MaxUnavailable: 1
+      LaunchTemplate:
+        Id: !Ref NodeLaunchTemplate
+        Version: !GetAtt NodeLaunchTemplate.LatestVersionNumber
+
+  NodeLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${EnvironmentName}-node-template
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: 100
+              VolumeType: gp3
+              DeleteOnTermination: true
+              Encrypted: true
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required
+          HttpPutResponseHopLimit: 2
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            /etc/eks/bootstrap.sh ${EnvironmentName}-${ClusterName} \
+              --container-runtime containerd \
+              --kubelet-extra-args '--max-pods=110' \
+              --b64-cluster-ca ${EKSCluster.CertificateAuthority.Data}
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: !Sub ${EnvironmentName}-eks-node
+              - Key: Environment
+                Value: !Ref EnvironmentName
+
+Outputs:
+  ClusterName:
+    Description: EKS cluster name
+    Value: !Sub ${EnvironmentName}-${ClusterName}
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterName
+
+  ClusterEndpoint:
+    Description: EKS cluster endpoint
+    Value: !GetAtt EKSCluster.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterEndpoint
+
+  ClusterSecurityGroup:
+    Description: Security group for EKS cluster
+    Value: !Ref EKSSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterSecurityGroup
+
+  NodeGroupName:
+    Description: EKS node group name
+    Value: !Ref NodeGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeGroupName
+
+  KubeConfigCommand:
+    Description: Command to create kubeconfig file
+    Value: !Sub |
+      aws eks update-kubeconfig --name ${EnvironmentName}-${ClusterName} --region ${AWS::Region}
