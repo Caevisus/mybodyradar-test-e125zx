@@ -1,0 +1,194 @@
+---
+# Development Environment Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: development-config
+  namespace: backend
+  labels:
+    app: smart-apparel
+    environment: development
+    component: config
+data:
+  ENVIRONMENT: "development"
+  LOG_LEVEL: "debug"
+  ENABLE_DEBUG: "true"
+
+---
+# Backend API Development Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: backend
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: api-server
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: DEBUG
+          value: "*"
+        ports:
+        - containerPort: 9229
+          name: debug
+        volumeMounts:
+        - name: src
+          mountPath: /app/src
+      volumes:
+      - name: src
+        hostPath:
+          path: /local/path/to/src
+
+---
+# Backend Workers Development Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  namespace: backend
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: worker
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: DEBUG
+          value: "*"
+        ports:
+        - containerPort: 9230
+          name: debug
+
+---
+# Web Frontend Development Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  namespace: frontend
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: web
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: REACT_APP_API_URL
+          value: "http://localhost:8000"
+        volumeMounts:
+        - name: src
+          mountPath: /app/src
+        - name: public
+          mountPath: /app/public
+      volumes:
+      - name: src
+        hostPath:
+          path: /local/path/to/web/src
+      - name: public
+        hostPath:
+          path: /local/path/to/web/public
+
+---
+# API Gateway Development Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-gateway
+  namespace: backend
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: kong
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        env:
+        - name: KONG_LOG_LEVEL
+          value: "debug"
+        - name: KONG_PROXY_ACCESS_LOG
+          value: "/dev/stdout"
+        - name: KONG_ADMIN_ACCESS_LOG
+          value: "/dev/stdout"
+        - name: KONG_PROXY_ERROR_LOG
+          value: "/dev/stderr"
+        - name: KONG_ADMIN_ERROR_LOG
+          value: "/dev/stderr"
+
+---
+# Development Storage Configuration
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: development-data
+  namespace: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# Development Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: development-network-policy
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: frontend
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: storage
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
