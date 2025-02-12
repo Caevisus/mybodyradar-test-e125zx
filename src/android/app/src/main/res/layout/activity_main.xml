@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Smart Apparel Main Activity Layout
+    Material Design 3.0 compliant root container with dynamic theming and accessibility support
+    Package: androidx.constraintlayout:constraintlayout:2.1.4
+    Package: com.google.android.material:material:1.9.0
+    Package: androidx.fragment:fragment:1.5.7
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/root_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:hardwareAccelerated="true"
+    android:forceDarkAllowed="true"
+    android:importantForAccessibility="yes"
+    android:theme="@style/Theme.App"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <!-- Material Toolbar with dynamic elevation and color theming -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:elevation="4dp"
+        android:background="?attr/colorSurface"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextAppearance="@style/TextAppearance.App.Headline2"
+        app:titleCentered="true"
+        android:contentDescription="@string/toolbar_description"
+        app:navigationIconTint="?attr/colorOnSurface"
+        app:menu="@menu/toolbar_menu"
+        android:accessibilityTraversalBefore="@id/nav_host_fragment"
+        android:accessibilityHeading="true"/>
+
+    <!-- Navigation Host Fragment Container -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph"
+        android:layerType="hardware"
+        android:contentDescription="@string/content_area_description"
+        android:accessibilityTraversalAfter="@id/toolbar"
+        android:accessibilityTraversalBefore="@id/bottom_navigation"/>
+
+    <!-- Material Bottom Navigation with enhanced touch targets -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_nav_height"
+        android:layout_gravity="bottom"
+        android:background="?attr/colorSurface"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"
+        app:itemIconSize="@dimen/touch_target_min"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemRippleColor="?attr/colorPrimaryContainer"
+        app:itemActiveIndicatorStyle="@style/Widget.App.BottomNavigation.ActiveIndicator"
+        android:contentDescription="@string/bottom_nav_description"
+        android:accessibilityTraversalAfter="@id/nav_host_fragment"
+        app:itemPaddingTop="@dimen/spacing_sm"
+        app:itemPaddingBottom="@dimen/spacing_sm"/>
+
+    <!-- Loading State Overlay -->
+    <include
+        android:id="@+id/loading_view"
+        layout="@layout/view_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:animateLayoutChanges="true"
+        android:contentDescription="@string/loading_description"
+        android:elevation="16dp"
+        android:focusable="true"
+        android:clickable="true"/>
+
+    <!-- System Window Insets Padding -->
+    <androidx.constraintlayout.widget.Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_sm"
+        app:layout_constraintTop_toTopOf="parent"
+        android:fitsSystemWindows="true"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
