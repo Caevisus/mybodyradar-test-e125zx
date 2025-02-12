@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="8dp"
+    android:stateListAnimator="@animator/card_state_list_anim"
+    android:focusable="true"
+    android:clickable="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layoutDirection="locale">
+
+        <TextView
+            android:id="@+id/tv_sensor_status_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textStyle="bold"
+            android:text="@string/sensor_status_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_connection_status"
+            app:layout_constraintTop_toTopOf="parent"
+            android:accessibilityLiveRegion="polite"
+            tools:text="Connected"/>
+
+        <ImageView
+            android:id="@+id/iv_connection_status"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_sensor_status_title"
+            app:layout_constraintBottom_toBottomOf="@id/tv_sensor_status_title"
+            android:contentDescription="@string/sensor_status_icon_description"
+            android:importantForAccessibility="yes"
+            tools:src="@drawable/ic_sensor_connected"/>
+
+        <TextView
+            android:id="@+id/tv_battery_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/battery_level_label"
+            android:textAppearance="?attr/textAppearanceCaption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_sensor_status_title"/>
+
+        <ProgressBar
+            android:id="@+id/pb_battery_level"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:progress="0"
+            android:max="100"
+            app:layout_constraintStart_toEndOf="@id/tv_battery_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_battery_label"
+            app:layout_constraintBottom_toBottomOf="@id/tv_battery_label"
+            android:contentDescription="@string/battery_level_description"
+            android:accessibilityLiveRegion="polite"
+            tools:progress="75"/>
+
+        <TextView
+            android:id="@+id/tv_signal_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/signal_strength_label"
+            android:textAppearance="?attr/textAppearanceCaption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_battery_label"/>
+
+        <ProgressBar
+            android:id="@+id/pb_signal_strength"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:progress="0"
+            android:max="100"
+            app:layout_constraintStart_toEndOf="@id/tv_signal_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_signal_label"
+            app:layout_constraintBottom_toBottomOf="@id/tv_signal_label"
+            android:contentDescription="@string/signal_strength_description"
+            android:accessibilityLiveRegion="polite"
+            tools:progress="90"/>
+
+        <Button
+            android:id="@+id/btn_calibrate"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/calibrate_button_text"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_signal_label"
+            tools:visibility="visible"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
