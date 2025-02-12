@@ -1,0 +1,61 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: high-performance
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+    description: "High-performance storage for time-series sensor data and real-time analytics"
+spec:
+  provisioner: kubernetes.io/aws-ebs
+  parameters:
+    type: io2
+    iopsPerGB: "50"
+    fsType: ext4
+    encrypted: "true"
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+  volumeBindingMode: WaitForFirstConsumer
+  mountOptions:
+    - noatime
+    - nodiscard
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+    description: "General-purpose storage for application data and intermediate processing"
+spec:
+  provisioner: kubernetes.io/aws-ebs
+  parameters:
+    type: gp3
+    fsType: ext4
+    encrypted: "true"
+  reclaimPolicy: Delete
+  allowVolumeExpansion: true
+  volumeBindingMode: WaitForFirstConsumer
+  mountOptions:
+    - noatime
+    - nodiscard
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: archive
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+    description: "Cost-optimized storage for historical data and long-term retention"
+spec:
+  provisioner: kubernetes.io/aws-ebs
+  parameters:
+    type: sc1
+    fsType: ext4
+    encrypted: "true"
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+  volumeBindingMode: WaitForFirstConsumer
+  mountOptions:
+    - noatime
+    - nodiscard
