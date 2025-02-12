@@ -1,0 +1,180 @@
+---
+# Backend namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+  labels:
+    name: backend
+    component: services
+    part-of: smart-apparel
+    environment: production
+    criticality: high
+  annotations:
+    owner: platform-team
+    compliance-level: high
+    backup-policy: enabled
+    monitoring-level: detailed
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: backend-quota
+  namespace: backend
+spec:
+  hard:
+    requests.cpu: "32"
+    requests.memory: "64Gi"
+    limits.cpu: "32"
+    limits.memory: "64Gi"
+    pods: "100"
+    configmaps: "50"
+    secrets: "50"
+    persistentvolumeclaims: "20"
+---
+# Frontend namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+    component: web
+    part-of: smart-apparel
+    environment: production
+    criticality: high
+  annotations:
+    owner: platform-team
+    compliance-level: high
+    backup-policy: enabled
+    monitoring-level: detailed
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: frontend-quota
+  namespace: frontend
+spec:
+  hard:
+    requests.cpu: "16"
+    requests.memory: "32Gi"
+    limits.cpu: "16"
+    limits.memory: "32Gi"
+    pods: "50"
+    configmaps: "30"
+    secrets: "30"
+    persistentvolumeclaims: "10"
+---
+# Monitoring namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    component: observability
+    part-of: smart-apparel
+    environment: production
+    criticality: medium
+  annotations:
+    owner: platform-team
+    compliance-level: high
+    backup-policy: enabled
+    monitoring-level: detailed
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: monitoring-quota
+  namespace: monitoring
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: "16Gi"
+    limits.cpu: "8"
+    limits.memory: "16Gi"
+    pods: "20"
+    configmaps: "20"
+    secrets: "20"
+    persistentvolumeclaims: "5"
+---
+# Storage namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+  labels:
+    name: storage
+    component: persistence
+    part-of: smart-apparel
+    environment: production
+    criticality: high
+  annotations:
+    owner: platform-team
+    compliance-level: high
+    backup-policy: enabled
+    monitoring-level: detailed
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: storage-quota
+  namespace: storage
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: "16Gi"
+    limits.cpu: "8"
+    limits.memory: "16Gi"
+    pods: "20"
+    configmaps: "20"
+    secrets: "20"
+    persistentvolumeclaims: "30"
+---
+# Network Policies for Cross-Namespace Communication
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-allowed-ingress
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: frontend
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-allowed-egress
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: frontend
+    - namespaceSelector:
+        matchLabels:
+          name: storage
