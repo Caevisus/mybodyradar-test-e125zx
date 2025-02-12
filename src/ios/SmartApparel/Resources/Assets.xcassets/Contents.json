@@ -1,0 +1,44 @@
+{
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  },
+  "properties": {
+    "provides-namespace": true,
+    "preserves-vector-representation": true,
+    "compression-type": "automatic",
+    "auto-scaling": true,
+    "template-rendering-intent": "template",
+    "on-demand-resource-tags": []
+  },
+  "rendering": {
+    "compression-type": "automatic",
+    "preserves-vector-representation": true,
+    "auto-scaling": true,
+    "template-rendering": true,
+    "provides-namespace": true
+  },
+  "deployment": {
+    "minimum-system-version": "14.0",
+    "target-device": [
+      "iphone",
+      "ipad"
+    ]
+  },
+  "theming": {
+    "supports-dark-mode": true,
+    "supports-dynamic-colors": true,
+    "supports-custom-themes": true,
+    "color-space": "display-p3",
+    "pixel-format": "rgba8"
+  },
+  "optimization": {
+    "memory": "memory",
+    "storage": "space",
+    "compression-quality": 0.8,
+    "on-demand-resource-rules": {
+      "prefetch-order": "visible-first",
+      "preservation-priority": "high"
+    }
+  }
+}
