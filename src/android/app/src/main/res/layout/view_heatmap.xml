@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Heat Map Visualization Component
+    Material Design 3.0 compliant layout with enhanced accessibility
+    Supports both 2D and 3D visualization modes with real-time updates
+    Min SDK: API 29
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/heatMapCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/spacing_md"
+    android:contentDescription="@string/heatmap_card_description"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    app:cardBackgroundColor="?attr/colorSurface"
+    style="@style/Widget.App.Card.Elevated">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_md"
+        android:clipToPadding="false"
+        android:clipChildren="false">
+
+        <!-- Heat Map Visualization View -->
+        <com.smartapparel.app.presentation.components.HeatMapView
+            android:id="@+id/heatMapView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:minHeight="@dimen/heatmap_min_height"
+            android:maxHeight="@dimen/heatmap_max_height"
+            android:contentDescription="@string/heatmap_view_description"
+            android:importantForAccessibility="yes"
+            android:layerType="hardware"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintDimensionRatio="16:9"
+            style="@style/Widget.App.HeatMap"
+            tools:src="@tools:sample/backgrounds/scenic"/>
+
+        <!-- Visualization Mode Toggle -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/visualizationModeGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_md"
+            android:minHeight="@dimen/touch_target_min"
+            android:orientation="horizontal"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mode2dButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_2d"
+                android:minWidth="@dimen/touch_target_min"
+                android:contentDescription="@string/mode_2d_description"
+                style="?attr/materialButtonOutlinedStyle"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mode3dButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_3d"
+                android:minWidth="@dimen/touch_target_min"
+                android:contentDescription="@string/mode_3d_description"
+                style="?attr/materialButtonOutlinedStyle"/>
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- Color Scale Legend -->
+        <LinearLayout
+            android:id="@+id/legendContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/spacing_md"
+            android:padding="@dimen/spacing_xs"
+            android:background="@drawable/legend_background"
+            app:layout_constraintTop_toTopOf="@id/heatMapView"
+            app:layout_constraintBottom_toBottomOf="@id/heatMapView"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/legendMaxLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/legend_max"
+                android:textAppearance="@style/TextAppearance.App.Caption"
+                android:textColor="?attr/colorOnSurface"/>
+
+            <View
+                android:id="@+id/legendGradient"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/spacing_xs"
+                android:background="@drawable/heatmap_gradient"/>
+
+            <TextView
+                android:id="@+id/legendMinLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/legend_min"
+                android:textAppearance="@style/TextAppearance.App.Caption"
+                android:textColor="?attr/colorOnSurface"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
