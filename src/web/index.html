@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, shrink-to-fit=no">
+    
+    <!-- Primary Meta Tags -->
+    <title>Smart Apparel</title>
+    <meta name="description" content="Smart Apparel - Athletic Performance Monitoring System for comprehensive biomechanical and physiological insights">
+    
+    <!-- Theme Configuration -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+    
+    <!-- PWA Configuration -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Smart Apparel">
+    <meta name="apple-mobile-web-app-title" content="Smart Apparel">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Favicons and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Fonts with performance optimization -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Critical JavaScript -->
+    <link rel="modulepreload" href="./src/main.tsx" as="script" crossorigin>
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.smartapparel.com; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests;">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
+</head>
+<body>
+    <!-- Accessibility skip link -->
+    <a href="#main" class="skip-to-main-content">Skip to main content</a>
+    
+    <!-- Application root with ARIA landmark -->
+    <div id="root" role="main" aria-label="Smart Apparel Application"></div>
+    
+    <!-- JavaScript disabled message -->
+    <noscript>
+        <div style="padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+            <h1>JavaScript Required</h1>
+            <p>You need to enable JavaScript to run this application. Please enable JavaScript or use a modern browser that supports JavaScript.</p>
+        </div>
+    </noscript>
+    
+    <!-- Application entry point -->
+    <script type="module" src="./src/main.tsx"></script>
+</body>
+</html>
