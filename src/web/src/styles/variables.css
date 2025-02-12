@@ -1,0 +1,184 @@
+/* Material Design 3.0 Design Tokens
+ * Implements comprehensive design system with support for:
+ * - Light/Dark themes
+ * - Dynamic color system
+ * - Typography scale
+ * - Spacing and layout
+ * - Elevation system
+ * - Motion and animation
+ * Version: Material Design 3.0
+ */
+
+:root {
+  /* Color System - Light Theme Defaults */
+  --color-primary: #1976d2;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #e3f2fd;
+  --color-on-primary-container: #001e2f;
+  --color-primary-light: #42a5f5;
+  --color-primary-dark: #1565c0;
+
+  --color-secondary: #9c27b0;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #ffd8ff;
+  --color-on-secondary-container: #25005b;
+
+  --color-surface: #ffffff;
+  --color-on-surface: #1a1c1e;
+  --color-surface-1: #f8f9fa;
+  --color-surface-2: #f1f3f4;
+  --color-surface-3: #e8eaed;
+  --color-surface-variant: #dfe3e8;
+
+  --color-background: #fafafa;
+  --color-on-background: #1a1c1e;
+
+  --color-error: #d32f2f;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+
+  --color-success: #2e7d32;
+  --color-on-success: #ffffff;
+  --color-success-container: #b8e6b9;
+  --color-on-success-container: #002105;
+
+  --color-warning: #ed6c02;
+  --color-on-warning: #ffffff;
+  --color-warning-container: #ffddb8;
+  --color-on-warning-container: #2b1700;
+
+  /* Typography System */
+  --font-family-primary: 'Roboto', system-ui, sans-serif;
+  --font-size-base: 16px;
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.75rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h6: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.75rem;
+
+  --line-height-base: 1.5;
+  --line-height-heading: 1.2;
+  --line-height-body: 1.6;
+  --line-height-sm: 1.25;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Spacing System */
+  --spacing-unit: 8px;
+  --spacing-xs: calc(var(--spacing-unit) * 0.5);
+  --spacing-sm: var(--spacing-unit);
+  --spacing-md: calc(var(--spacing-unit) * 2);
+  --spacing-lg: calc(var(--spacing-unit) * 3);
+  --spacing-xl: calc(var(--spacing-unit) * 4);
+  --spacing-xxl: calc(var(--spacing-unit) * 6);
+
+  /* Elevation System */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+  --shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  --shadow-3: 0 10px 20px rgba(0,0,0,0.18), 0 6px 6px rgba(0,0,0,0.16);
+  --shadow-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  --shadow-5: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+
+  /* Animation System */
+  --transition-duration-fast: 150ms;
+  --transition-duration-normal: 250ms;
+  --transition-duration-slow: 350ms;
+  --transition-timing-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-timing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --transition-timing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Layout System */
+  --container-width-sm: 600px;
+  --container-width-md: 900px;
+  --container-width-lg: 1200px;
+  --container-padding: var(--spacing-md);
+
+  --z-index-drawer: 1200;
+  --z-index-modal: 1300;
+  --z-index-popup: 1400;
+  --z-index-tooltip: 1500;
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --border-radius-pill: 9999px;
+}
+
+/* Dark Theme Overrides */
+[data-theme='dark'] {
+  --color-primary: #90caf9;
+  --color-on-primary: #003258;
+  --color-primary-container: #004881;
+  --color-on-primary-container: #d1e4ff;
+  --color-primary-light: #b6e0ff;
+  --color-primary-dark: #5ba4e5;
+
+  --color-secondary: #d0bcff;
+  --color-on-secondary: #381e72;
+  --color-secondary-container: #4f378b;
+  --color-on-secondary-container: #eaddff;
+
+  --color-surface: #1a1c1e;
+  --color-on-surface: #e2e2e5;
+  --color-surface-1: #202124;
+  --color-surface-2: #292a2d;
+  --color-surface-3: #323336;
+  --color-surface-variant: #43474e;
+
+  --color-background: #1a1c1e;
+  --color-on-background: #e2e2e5;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  --color-success: #95d097;
+  --color-on-success: #00390d;
+  --color-success-container: #015316;
+  --color-on-success-container: #b8e6b9;
+
+  --color-warning: #ffb77c;
+  --color-on-warning: #482900;
+  --color-warning-container: #683d00;
+  --color-on-warning-container: #ffddb8;
+
+  /* Elevation System - Dark Theme */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.28);
+  --shadow-2: 0 3px 6px rgba(0,0,0,0.30), 0 2px 4px rgba(0,0,0,0.24);
+  --shadow-3: 0 10px 20px rgba(0,0,0,0.36), 0 6px 6px rgba(0,0,0,0.32);
+  --shadow-4: 0 14px 28px rgba(0,0,0,0.50), 0 10px 10px rgba(0,0,0,0.44);
+  --shadow-5: 0 19px 38px rgba(0,0,0,0.60), 0 15px 12px rgba(0,0,0,0.44);
+}
+
+/* High Contrast Theme Overrides */
+[data-theme='high-contrast'] {
+  --color-primary: #0056b3;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #003366;
+  --color-on-primary-container: #ffffff;
+
+  --color-secondary: #6a0080;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #4a005a;
+  --color-on-secondary-container: #ffffff;
+
+  --color-error: #c00;
+  --color-on-error: #ffffff;
+  --color-success: #006400;
+  --color-on-success: #ffffff;
+  --color-warning: #cc6600;
+  --color-on-warning: #ffffff;
+
+  --color-surface: #ffffff;
+  --color-on-surface: #000000;
+  --color-background: #ffffff;
+  --color-on-background: #000000;
+}
