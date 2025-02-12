@@ -1,0 +1,238 @@
+---
+# Production Environment Configuration for Smart Apparel System
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: production-config
+  namespace: backend
+  labels:
+    app: smart-apparel
+    environment: production
+    component: config
+data:
+  ENVIRONMENT: "production"
+  CLUSTER_NAME: "smart-apparel-prod"
+  REGION: "us-east-1"
+  AVAILABILITY_ZONES: "us-east-1a,us-east-1b,us-east-1c"
+
+---
+# API Server Resource Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server-config
+  namespace: backend
+spec:
+  template:
+    spec:
+      containers:
+      - name: api-server
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-type
+                  operator: In
+                  values:
+                  - compute-optimized
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                    - api
+                topologyKey: kubernetes.io/hostname
+
+---
+# Worker Resource Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-config
+  namespace: backend
+spec:
+  template:
+    spec:
+      containers:
+      - name: worker
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-type
+                  operator: In
+                  values:
+                  - compute-optimized
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - worker
+              topologyKey: kubernetes.io/hostname
+
+---
+# Kafka Cluster Configuration
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka-cluster
+  namespace: backend
+spec:
+  kafka:
+    replicas: 3
+    storage:
+      type: jbod
+      volumes:
+      - id: 0
+        type: persistent-claim
+        size: 100Gi
+        deleteClaim: false
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+    resources:
+      requests:
+        memory: 4Gi
+        cpu: 2
+      limits:
+        memory: 8Gi
+        cpu: 4
+
+---
+# Network Policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: production-network-policy
+  namespace: backend
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: frontend
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: storage
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+
+---
+# Security Context Constraints
+apiVersion: v1
+kind: SecurityContextConstraints
+metadata:
+  name: production-security
+spec:
+  runAsUser:
+    type: MustRunAs
+    uid: 1000
+  seLinuxContext:
+    type: MustRunAs
+    level: "s0:c123,c456"
+  fsGroup:
+    type: MustRunAs
+    ranges:
+    - min: 1000
+      max: 1000
+  supplementalGroups:
+    type: MustRunAs
+    ranges:
+    - min: 1000
+      max: 1000
+  allowPrivilegeEscalation: false
+  defaultAllowPrivilegeEscalation: false
+  allowHostDirVolumePlugin: false
+  allowHostIPC: false
+  allowHostNetwork: false
+  allowHostPID: false
+  allowHostPorts: false
+  allowPrivilegedContainer: false
+  readOnlyRootFilesystem: true
+
+---
+# Monitoring Configuration
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: production-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: production.rules
+    rules:
+    - alert: HighLatency
+      expr: http_request_duration_seconds > 0.1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        description: "High latency detected"
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        description: "High error rate detected"
+
+---
+# TLS Configuration
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: production-tls
+  namespace: backend
+spec:
+  secretName: production-tls-secret
+  duration: 2160h # 90 days
+  renewBefore: 360h # 15 days
+  subject:
+    organizations:
+    - Smart Apparel Inc.
+  commonName: smart-apparel.com
+  dnsNames:
+  - smart-apparel.com
+  - "*.smart-apparel.com"
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  usages:
+  - server auth
+  - client auth
