@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Smart Apparel Signup Fragment Layout
+    Material Design 3.0 compliant with HIPAA/GDPR considerations
+    Dependencies:
+    - com.google.android.material:material:1.9.0
+    - androidx.biometric:biometric:1.1.0
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:scrollbarStyle="outsideOverlay">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_lg">
+
+        <TextView
+            android:id="@+id/signup_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_lg"
+            android:text="@string/signup_title"
+            android:textAppearance="@style/TextAppearance.App.Headline1"
+            android:importantForAccessibility="yes"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/email_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:hint="@string/email_hint"
+            app:errorEnabled="true"
+            app:startIconDrawable="@drawable/ic_email"
+            app:helperTextEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/email_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:minHeight="@dimen/touch_target_min"
+                android:contentDescription="@string/email_input_desc"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:hint="@string/password_hint"
+            app:errorEnabled="true"
+            app:passwordToggleEnabled="true"
+            app:startIconDrawable="@drawable/ic_lock"
+            app:helperText="@string/password_requirements">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:minHeight="@dimen/touch_target_min"
+                android:contentDescription="@string/password_input_desc"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/confirm_password_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_lg"
+            android:hint="@string/confirm_password_hint"
+            app:errorEnabled="true"
+            app:passwordToggleEnabled="true"
+            app:startIconDrawable="@drawable/ic_lock">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/confirm_password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:minHeight="@dimen/touch_target_min"
+                android:contentDescription="@string/confirm_password_input_desc"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <include
+            android:id="@+id/password_requirements"
+            layout="@layout/include_password_requirements"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_lg"/>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/gdpr_consent_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gdpr_consent_text"
+            android:minHeight="@dimen/touch_target_min"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:textAppearance="@style/TextAppearance.App.Body1"/>
+
+        <include
+            android:id="@+id/biometric_setup"
+            layout="@layout/include_biometric_setup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_lg"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/button_height">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/signup_button"
+                style="@style/Widget.App.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/signup_button_text"
+                android:contentDescription="@string/signup_button_desc"
+                app:icon="@drawable/ic_person_add"/>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/signup_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                app:indicatorSize="@dimen/progress_indicator_size"
+                style="@style/Widget.App.ProgressIndicator"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/login_prompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:text="@string/login_prompt_text"
+            android:textAppearance="@style/TextAppearance.App.Body1"
+            android:padding="@dimen/spacing_md"
+            android:minHeight="@dimen/touch_target_min"/>
+
+    </LinearLayout>
+</ScrollView>
