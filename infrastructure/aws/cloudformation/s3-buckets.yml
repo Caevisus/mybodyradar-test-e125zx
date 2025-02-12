@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for Smart Apparel S3 buckets with lifecycle policies and security configurations
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: Environment name for resource naming and tagging
+    AllowedValues:
+      - development
+      - staging 
+      - production
+
+  RetentionPeriod:
+    Type: Number
+    Default: 1825
+    Description: Data retention period in days (5 years)
+    MinValue: 365
+    MaxValue: 3650
+
+Resources:
+  SensorDataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub smart-apparel-sensor-data-${EnvironmentName}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !ImportValue iam-stack:KMSKeyArn
+      LifecycleConfiguration:
+        Rules:
+          - Id: SensorDataLifecycle
+            Status: Enabled
+            Transitions:
+              - Days: 30
+                StorageClass: STANDARD_IA
+              - Days: 90
+                StorageClass: GLACIER
+              - Days: 365
+                StorageClass: DEEP_ARCHIVE
+            ExpirationInDays: !Ref RetentionPeriod
+      MetricsConfigurations:
+        - Id: EntireBucket
+      AccelerateConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Purpose
+          Value: SensorData
+
+  AnalyticsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub smart-apparel-analytics-${EnvironmentName}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !ImportValue iam-stack:KMSKeyArn
+      LifecycleConfiguration:
+        Rules:
+          - Id: AnalyticsDataLifecycle
+            Status: Enabled
+            Transitions:
+              - Days: 60
+                StorageClass: STANDARD_IA
+              - Days: 180
+                StorageClass: GLACIER
+            ExpirationInDays: !Ref RetentionPeriod
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Purpose
+          Value: Analytics
+
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub smart-apparel-backup-${EnvironmentName}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !ImportValue iam-stack:KMSKeyArn
+      LifecycleConfiguration:
+        Rules:
+          - Id: BackupLifecycle
+            Status: Enabled
+            Transitions:
+              - Days: 90
+                StorageClass: GLACIER
+              - Days: 180
+                StorageClass: DEEP_ARCHIVE
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Purpose
+          Value: Backup
+
+  BucketAccessPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SensorDataBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnforceSSLOnly
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: 
+              - !Sub arn:aws:s3:::${SensorDataBucket}/*
+              - !Sub arn:aws:s3:::${SensorDataBucket}
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  CloudWatchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${EnvironmentName}-s3-storage-alarm
+      AlarmDescription: Alarm when bucket storage exceeds threshold
+      MetricName: BucketSizeBytes
+      Namespace: AWS/S3
+      Statistic: Average
+      Period: 86400
+      EvaluationPeriods: 1
+      Threshold: 1000000000000  # 1TB
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref SensorDataBucket
+      AlarmActions:
+        - !ImportValue iam-stack:SNSTopicArn
+
+Outputs:
+  SensorDataBucketName:
+    Description: Name of the sensor data bucket
+    Value: !Ref SensorDataBucket
+    Export:
+      Name: !Sub ${EnvironmentName}-sensor-data-bucket
+
+  AnalyticsBucketName:
+    Description: Name of the analytics bucket
+    Value: !Ref AnalyticsBucket
+    Export:
+      Name: !Sub ${EnvironmentName}-analytics-bucket
+
+  BackupBucketName:
+    Description: Name of the backup bucket
+    Value: !Ref BackupBucket
+    Export:
+      Name: !Sub ${EnvironmentName}-backup-bucket
+
+  SensorDataBucketArn:
+    Description: ARN of the sensor data bucket
+    Value: !GetAtt SensorDataBucket.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-sensor-data-bucket-arn
