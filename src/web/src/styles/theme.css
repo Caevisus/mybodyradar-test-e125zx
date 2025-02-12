@@ -1,0 +1,149 @@
+/* Import Roboto font from @fontsource - v5.0.0 */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+/* Import core variables */
+@import './variables.css';
+
+/* Reset and base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+/* Theme provider base class */
+.theme-provider {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: var(--theme-transition);
+  isolation: isolate;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+}
+
+/* Light theme styles */
+.theme-light {
+  color-scheme: light;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  --theme-team-primary: var(--team-color-light);
+  --theme-team-secondary: var(--team-color-light-secondary);
+}
+
+/* Dark theme styles */
+.theme-dark {
+  color-scheme: dark;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  --theme-team-primary: var(--team-color-dark);
+  --theme-team-secondary: var(--team-color-dark-secondary);
+}
+
+/* System theme preference detection */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --initial-color-mode: dark;
+  }
+}
+
+/* Responsive breakpoints */
+@media (min-width: 320px) {
+  :root {
+    --grid-unit: 4px;
+    --container-padding: var(--spacing-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --grid-unit: 8px;
+    --container-padding: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --grid-unit: 8px;
+    --container-padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --grid-unit: 12px;
+    --container-padding: var(--spacing-xl);
+  }
+}
+
+/* Accessibility - Focus styles */
+:focus-visible {
+  outline: var(--theme-focus-ring);
+  outline-offset: var(--theme-focus-ring-offset);
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Material Design elevation system */
+.elevation-1 { box-shadow: var(--shadow-1); }
+.elevation-2 { box-shadow: var(--shadow-2); }
+.elevation-3 { box-shadow: var(--shadow-3); }
+.elevation-4 { box-shadow: var(--shadow-4); }
+.elevation-5 { box-shadow: var(--shadow-5); }
+
+/* Custom theme properties */
+:root {
+  --theme-transition: all 0.2s var(--transition-timing-ease);
+  --theme-border-radius: var(--border-radius-md);
+  --theme-box-shadow: var(--shadow-2);
+  --theme-focus-ring: 0 0 0 3px var(--color-primary);
+  --theme-focus-ring-offset: 2px;
+  --theme-animation-timing: var(--transition-timing-ease);
+}
+
+/* Sports-specific component styles */
+.performance-indicator {
+  border-radius: var(--theme-border-radius);
+  padding: var(--spacing-sm);
+  background-color: var(--color-surface);
+  box-shadow: var(--theme-box-shadow);
+}
+
+.heat-map {
+  border-radius: var(--theme-border-radius);
+  overflow: hidden;
+  background-color: var(--color-surface-variant);
+}
+
+.biometric-display {
+  border-radius: var(--theme-border-radius);
+  padding: var(--spacing-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-surface-variant);
+}
+
+/* Typography scale */
+.text-h1 { font-size: var(--font-size-h1); line-height: var(--line-height-heading); font-weight: var(--font-weight-bold); }
+.text-h2 { font-size: var(--font-size-h2); line-height: var(--line-height-heading); font-weight: var(--font-weight-bold); }
+.text-h3 { font-size: var(--font-size-h3); line-height: var(--line-height-heading); font-weight: var(--font-weight-bold); }
+.text-h4 { font-size: var(--font-size-h4); line-height: var(--line-height-heading); font-weight: var(--font-weight-medium); }
+.text-h5 { font-size: var(--font-size-h5); line-height: var(--line-height-heading); font-weight: var(--font-weight-medium); }
+.text-h6 { font-size: var(--font-size-h6); line-height: var(--line-height-heading); font-weight: var(--font-weight-medium); }
+.text-body { font-size: var(--font-size-base); line-height: var(--line-height-body); }
+.text-small { font-size: var(--font-size-sm); line-height: var(--line-height-sm); }
+.text-xs { font-size: var(--font-size-xs); line-height: var(--line-height-sm); }
