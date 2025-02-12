@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Smart Apparel Dark Theme
+    Material Design 3.0 compliant dark theme with OLED optimization
+    Package: com.google.android.material:material:1.9.0
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base Dark Application Theme -->
+    <style name="Theme.App" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Material Design 3.0 Color System -->
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorSecondary">@color/secondary_dark</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorTertiary">@color/tertiary</item>
+
+        <!-- Surface and Background Colors - OLED Optimized -->
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/text_primary_dark</item>
+
+        <!-- Status and System Bars -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+
+        <!-- Elevation System -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="elevationOverlayColor">@color/elevation_overlay_dark</item>
+
+        <!-- Component Styles -->
+        <item name="materialButtonStyle">@style/Widget.App.Button.Primary.Dark</item>
+        <item name="materialCardViewStyle">@style/Widget.App.Card.Dark</item>
+        <item name="customHeatMapStyle">@style/Widget.App.HeatMap.Dark</item>
+
+        <!-- Typography -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.App.Dark.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.App.Dark.Headline2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.App.Dark.Body1</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.App.Dark.Caption</item>
+
+        <!-- Team Color Integration -->
+        <item name="teamColorOverlay">@color/team_color_dark</item>
+
+        <!-- System UI Flags for Edge-to-Edge Design -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="28">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+
+        <!-- Dynamic Colors Support -->
+        <item name="android:forceDarkAllowed" tools:targetApi="29">true</item>
+        <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Dark</item>
+    </style>
+
+    <!-- Dark Theme Typography Variants -->
+    <style name="TextAppearance.App.Dark.Headline1" parent="TextAppearance.App.Headline1">
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:alpha">0.87</item>
+    </style>
+
+    <style name="TextAppearance.App.Dark.Headline2" parent="TextAppearance.App.Headline2">
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:alpha">0.87</item>
+    </style>
+
+    <style name="TextAppearance.App.Dark.Body1" parent="TextAppearance.App.Body1">
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:alpha">0.87</item>
+    </style>
+
+    <style name="TextAppearance.App.Dark.Caption" parent="TextAppearance.App.Caption">
+        <item name="android:textColor">@color/text_secondary_dark</item>
+        <item name="android:alpha">0.60</item>
+    </style>
+
+    <!-- Dark Theme Component Overrides -->
+    <style name="Widget.App.Button.Primary.Dark" parent="Widget.App.Button.Primary">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="rippleColor">@color/elevation_overlay_dark</item>
+    </style>
+
+    <style name="Widget.App.Card.Dark" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/surface_dark</item>
+        <item name="rippleColor">@color/elevation_overlay_dark</item>
+        <item name="cardElevation">8dp</item>
+    </style>
+
+    <style name="Widget.App.HeatMap.Dark" parent="Widget.App.HeatMap">
+        <item name="android:background">@color/surface_dark</item>
+        <item name="cardBackgroundColor">@color/surface_dark</item>
+        <item name="contentPadding">12dp</item>
+    </style>
+</resources>
