@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Core App Information -->
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    
+    <!-- Deployment Requirements -->
+    <key>MinimumOSVersion</key>
+    <string>14.0</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    
+    <!-- Required Device Capabilities -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+        <string>bluetooth-le</string>
+        <string>gyroscope</string>
+        <string>accelerometer</string>
+        <string>magnetometer</string>
+    </array>
+    
+    <!-- Background Execution Modes -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>bluetooth-central</string>
+        <string>bluetooth-peripheral</string>
+        <string>fetch</string>
+        <string>processing</string>
+        <string>external-accessory</string>
+    </array>
+    
+    <!-- Privacy Permissions -->
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Smart Apparel requires continuous Bluetooth access to connect with your smart apparel sensors for real-time performance monitoring and biomechanical analysis</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>Smart Apparel uses Bluetooth to establish secure connections with your smart apparel sensors for continuous data collection</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Motion data is essential for analyzing your movement patterns, performance metrics, and providing real-time biomechanical insights</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Location data helps analyze your performance in different environments and conditions</string>
+    
+    <!-- UI Configuration -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>UIMainStoryboardFile</key>
+    <string></string>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- Security Configuration -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    
+    <!-- ATS Configuration -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+    
+    <!-- Additional Capabilities -->
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+    <key>UIStatusBarHidden</key>
+    <false/>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+</dict>
+</plist>
