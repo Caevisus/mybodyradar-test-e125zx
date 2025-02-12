@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Alert Card Component
+    Material Design 3.0 compliant, motion-optimized for athletic performance monitoring
+    Dependencies:
+    - com.google.android.material:material:1.9.0
+    - androidx.constraintlayout:constraintlayout:2.1.4
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/alert_card_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/spacing_md"
+    android:clickable="true"
+    android:focusable="true"
+    android:stateListAnimator="@animator/card_state_list_anim"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/touch_target_min"
+        android:padding="@dimen/spacing_md">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alert_severity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/touch_target_min"
+            android:textAllCaps="true"
+            android:textSize="@dimen/text_size_md"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="HIGH"
+            tools:textColor="@color/error_high_contrast"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alert_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:minHeight="@dimen/touch_target_min"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="@dimen/text_size_md"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/alert_severity"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Impact Detection Alert"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alert_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:ellipsize="end"
+            android:lineSpacingMultiplier="1.2"
+            android:maxLines="3"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="@dimen/text_size_md"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alert_title"
+            tools:text="High impact detected in right knee area. Consider reviewing movement pattern."/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/alert_action_button"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:minWidth="@dimen/touch_target_min"
+            android:minHeight="@dimen/touch_target_min"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alert_message"
+            tools:text="View Details"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
