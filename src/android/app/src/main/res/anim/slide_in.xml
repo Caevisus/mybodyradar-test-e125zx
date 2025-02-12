@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Slide-in animation resource optimized for smooth UI transitions
+    Duration: 300ms for optimal balance of smoothness and responsiveness
+    Interpolation: Accelerate-decelerate pattern for natural motion
+    Hardware acceleration enabled by default for optimal performance
+-->
+<translate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fromXDelta="-100%p"
+    android:toXDelta="0"
+    android:duration="300"
+    android:interpolator="@android:interpolator/accelerate_decelerate" />
