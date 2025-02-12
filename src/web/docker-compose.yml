@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"  # Main application port
+      - "9229:9229"  # Debug port
+    volumes:
+      - .:/app:delegated  # Source code with performance optimization
+      - node_modules:/app/node_modules:cached  # Cached node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_ENV=development
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_GRAPHQL_URL=http://localhost:3000/graphql
+      - VITE_WEBSOCKET_URL=ws://localhost:3000/ws
+      - VITE_API_TIMEOUT=30000
+      - VITE_API_RETRY_ATTEMPTS=3
+      - VITE_API_RETRY_DELAY=1000
+      - VITE_WEBSOCKET_RECONNECT_ATTEMPTS=5
+      - VITE_WEBSOCKET_RECONNECT_INTERVAL=2000
+      - VITE_SENSOR_DATA_RATE=100
+      - VITE_ENABLE_MOCK_SENSORS=true
+      - VITE_MOCK_SENSOR_LATENCY=50
+      - VITE_ENABLE_ANALYTICS=true
+      - VITE_ENABLE_ERROR_REPORTING=true
+      - VITE_LOG_LEVEL=debug
+      - VITE_ENABLE_PERFORMANCE_MONITORING=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - smart-apparel-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+networks:
+  smart-apparel-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: smart-apparel-net
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+
+volumes:
+  node_modules:
+    driver: local
+    driver_opts:
+      type: none
+      device: /docker/node_modules
+      o: bind
